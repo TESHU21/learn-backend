@@ -1,0 +1,23 @@
+{
+  "name": "learn-backend",
+  "version": "1.0.0",
+  "description": "backend with freecode camp",
+  "homepage": "https://github.com/TESHU21/learn-backend#readme",
+  "bugs": {
+    "url": "https://github.com/TESHU21/learn-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TESHU21/learn-backend.git"
+  },
+  "license": "ISC",
+  "author": "teshome m.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
