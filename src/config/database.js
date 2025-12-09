@@ -6,9 +6,11 @@ const connectDB = async () => {
             console.log("⚠️  MONGODB_URI is not defined in .env file");
             return false;
         }
+         console.log("Mongo_DB_URI",process.env.MONGODB_URI)
 
         const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}`, {
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+            serverSelectionTimeoutMS: 30000, // Timeout after 5s instead of 30s
+             socketTimeoutMS: 30000,
         });
         
         console.log(`✅ MongoDB Connected! Host: ${connectionInstance.connection.host}`);
