@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
@@ -26,7 +27,6 @@ const userSchema = new Schema(
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
 
-       
     loggedIn: {
       type: Boolean,
       default: false,
@@ -37,4 +37,13 @@ const userSchema = new Schema(
   }
 );
 
+// before saving any password we need to hash it!
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password;
+});
+// compare password
+userSchema.methods.comparePassword = async function (Candidatepassword) {
+  return await bcrypt.compare(Candidatepassword, this.password);
+};
 export const User = mongoose.model("User", userSchema);
