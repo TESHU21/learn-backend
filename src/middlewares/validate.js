@@ -1,4 +1,4 @@
-import { zod } from "zod";
+import { z } from "zod";
 const validateRequest = (schema) => (req, res, next) => {
   try {
     schema.parse(req.body); //Throws error if it is invalid
