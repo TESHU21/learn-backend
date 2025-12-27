@@ -26,6 +26,11 @@ const userSchema = new Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
+    role: {
+      type: String,
+      enum: ["user", "admin", "moderator"],
+      default: "user",
+    },
 
     loggedIn: {
       type: Boolean,

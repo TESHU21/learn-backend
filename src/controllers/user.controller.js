@@ -1,13 +1,14 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt"; // Import bcrypt for password hashing
 import validator from "validator"; // Optional: For email validation
+import jwt from "jsonwebtoken";
 
 const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     // Basic validation
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required!" });
     }
 
@@ -29,6 +30,7 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       username,
       email: email.toLowerCase(),
+      role: role.toLowerCase(),
       password: hashedPassword,
       loggedIn: false,
     });
@@ -40,6 +42,7 @@ const registerUser = async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -62,12 +65,23 @@ const loginUser = async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
+    // create token
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
     res.status(200).json({
       message: "User Logged in",
+      token,
       user: {
         id: user._id,
         email: user.email,
         username: user.username,
+        role: user.role,
       },
     });
   } catch (error) {

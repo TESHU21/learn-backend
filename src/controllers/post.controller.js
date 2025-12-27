@@ -8,7 +8,12 @@ const createPost = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const post = await Post.create({ name, description, age });
+    const post = await Post.create({
+      name,
+      description,
+      age,
+      author: req.user._id,
+    });
 
     res.status(201).json({
       message: "Post created successfully",
@@ -19,6 +24,7 @@ const createPost = async (req, res) => {
       message: "Internal Server Error",
       error,
     });
+    console.log("Errorr", error);
   }
 };
 // Get All Posts
@@ -44,6 +50,7 @@ const getSinglePost = async (req, res) => {
       .json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 // update a post
 const updatePost = async (req, res) => {
   try {
@@ -77,5 +84,69 @@ const deletePost = async (req, res) => {
     });
   }
 };
+// delete all posts
+const deleteAllPosts = async (req, res) => {
+  try {
+    // must be autenticated
+    if (!req.user) {
+      return res.status(401).json({ message: "Not Autenticated" });
+    }
 
-export { createPost, getPosts, updatePost, deletePost, getSinglePost };
+    const result = await Post.deleteMany({
+      author: req.user.id,
+    });
+    console.log("Response ", result);
+    res.status(200).json({
+      message: "All your posts have been deleted",
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.log("Delete All Post of a User", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+// approve a specific post by Admin
+const approvePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    post.status = "approved";
+    post.approvedAt = new Date();
+    post.approvedBy = req.user.id;
+    await post.save();
+
+    res.status(200).json({ message: "Post Approved Successfully" });
+  } catch (error) {}
+};
+// Rejected a specific post by Admin
+const rejectedPost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    post.status = "rejected";
+    await post.save();
+    res.status(200).json({ message: "Posted Rejected Successfully" });
+  } catch (error) {
+    res
+      .status(200)
+      .json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+export {
+  createPost,
+  getPosts,
+  updatePost,
+  deletePost,
+  deleteAllPosts,
+  getSinglePost,
+  approvePost,
+  rejectedPost,
+};
