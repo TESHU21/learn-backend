@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt"; // Import bcrypt for password hashing
 import validator from "validator"; // Optional: For email validation
 import jwt from "jsonwebtoken";
+import { generateAcessToken, generateRefreshToken } from "../utils/token.js";
 
 const registerUser = async (req, res) => {
   try {
@@ -66,17 +67,19 @@ const loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
     // create token
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
+    const accessToken = generateAcessToken(user);
+    const refreshToken = generateRefreshToken(user);
+    // store refresh token in cookies
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
       message: "User Logged in",
-      token,
+      accessToken,
       user: {
         id: user._id,
         email: user.email,
@@ -97,6 +100,11 @@ const logoutuser = async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
     res.status(200).json({ message: "Logout successfully" });
   } catch (error) {
     res.status(500).json({
