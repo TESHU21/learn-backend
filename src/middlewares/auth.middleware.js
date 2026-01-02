@@ -8,12 +8,21 @@ export const authenticate = async (req, res, next) => {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const accessToken = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
 
-    const user = await User.findById(decoded.id).select("_id email role");
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+
+    if (!decoded.userId) {
+      return res.status(401).json({ message: "Invalid token: missing userId" });
+    }
+
+    const user = await User.findById(decoded.userId).select("_id email role");
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -22,6 +31,13 @@ export const authenticate = async (req, res, next) => {
     req.user = user; // 🔥 THIS IS CRITICAL
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("Authentication error:", error.message);
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired" });
+    }
+    return res.status(401).json({ message: "Authentication failed", error: error.message });
   }
 };

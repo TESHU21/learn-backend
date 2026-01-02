@@ -1,11 +1,13 @@
 import { z } from "zod";
-const validateRequest = (schema) => (req, res, next) => {
-  try {
-    schema.parse(req.body); //Throws error if it is invalid
+const validateRequest = (schema) => {
+  return (res, req, next) => {
+    const result = schema.safeparse(req.body);
+    if (!result.success) {
+      return res.status(400).json({ message: result.error.error[0].message });
+    }
+    // replace request bosy with sanitized and validated data
+    req.body = result.data;
     next();
-  } catch (error) {
-    // Send the first error message
-    res.status(400).json({ message: error.errors[0].message });
-  }
+  };
 };
 export { validateRequest };

@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { ReturnDocument } from "mongodb";
 export const generateAcessToken = (user) => {
   return jwt.sign(
     {
@@ -7,7 +6,7 @@ export const generateAcessToken = (user) => {
       role: user.role,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "24h" }
   );
 };
 
