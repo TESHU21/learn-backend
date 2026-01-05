@@ -13,7 +13,11 @@ export const authenticate = async (req, res, next) => {
   try {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id).select("_id email role");
+    if (!decoded.userId) {
+      return res.status(401).json({ message: "Invalid token: missing userId" });
+    }
+
+    const user = await User.findById(decoded.userId).select("_id email role");
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });

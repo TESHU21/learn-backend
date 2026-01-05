@@ -38,7 +38,6 @@ const userSchema = new Schema(
         token: {
           type: String,
           required: true, // hashed refresh token
-          select: false, // never expose in queries by default
         },
         device: {
           type: String, // optional, device name or identifier
