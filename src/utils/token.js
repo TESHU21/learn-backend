@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-export const generateAcessToken = (user) => {
+const generateAcessToken = (user) => {
   return jwt.sign(
     {
       userId: user._id,
@@ -10,7 +10,7 @@ export const generateAcessToken = (user) => {
   );
 };
 
-export const generateRefreshToken = (user) => {
+const generateRefreshToken = (user) => {
   return jwt.sign(
     {
       userId: user._id,
@@ -19,3 +19,5 @@ export const generateRefreshToken = (user) => {
     { expiresIn: "7d" }
   );
 };
+
+export { generateAcessToken, generateRefreshToken };

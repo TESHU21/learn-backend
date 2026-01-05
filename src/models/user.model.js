@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { type } from "node:os";
+import { required } from "zod/mini";
 
 const userSchema = new Schema(
   {
@@ -31,6 +33,29 @@ const userSchema = new Schema(
       enum: ["user", "admin", "moderator"],
       default: "user",
     },
+    refreshTokens: [
+      {
+        token: {
+          type: String,
+          required: true, // hashed refresh token
+          select: false, // never expose in queries by default
+        },
+        device: {
+          type: String, // optional, device name or identifier
+        },
+        ip: {
+          type: String, // optional, IP address for logging
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        expiresAt: {
+          type: Date,
+          required: true,
+        },
+      },
+    ],
 
     loggedIn: {
       type: Boolean,
@@ -43,12 +68,50 @@ const userSchema = new Schema(
 );
 
 // before saving any password we need to hash it!
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password;
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
 });
+
 // compare password
 userSchema.methods.comparePassword = async function (Candidatepassword) {
   return await bcrypt.compare(Candidatepassword, this.password);
 };
+// add reresh Token
+userSchema.methods.addRefreshToken = async function (
+  refreshToken,
+  expiresAt,
+  device,
+  ip
+) {
+  const hashedToken = await bcrypt.hash(refreshToken, 10);
+  this.refreshTokens.push({
+    token: hashedToken,
+    device,
+    ip,
+    expiresAt,
+  });
+  await this.save();
+};
+// Validate Refresh Token
+userSchema.methods.validateRefreshToken = async function (refreshToken) {
+  for (const storedToken of this.refreshTokens) {
+    const isMatch = await bcrypt.compare(refreshToken, storedToken.token);
+    if (isMatch && storedToken.expiresAt > new Date()) {
+      return storedToken;
+    }
+  }
+  return null;
+};
+userSchema.methods.removeRefreshToken = async function (refreshToken) {
+  this.refreshTokens = await Promise.all(
+    this.refreshTokens.filter(async (t) => {
+      return !(await bcrypt.compare(refreshToken, t.token));
+    })
+  );
+
+  await this.save();
+};
+
 export const User = mongoose.model("User", userSchema);

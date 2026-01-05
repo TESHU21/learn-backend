@@ -10,13 +10,13 @@ export const refreshAccessToken = async (req, res) => {
   }
   try {
     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    
+
     // Fetch user to get role (refresh token only contains userId)
     const user = await User.findById(decoded.userId).select("_id role");
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
-    
+
     const newAccessToken = generateAcessToken(user);
     res.status(200).json({ accessToken: newAccessToken });
   } catch (error) {
