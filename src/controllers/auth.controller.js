@@ -4,7 +4,8 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import validator from "validator";
 import { generateAcessToken, generateRefreshToken } from "../utils/token.js";
-
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 const refreshAccessToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
 
@@ -78,73 +79,63 @@ const registerUser = async (req, res) => {
 };
 
 // -------------------- LOGIN USER --------------------
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    if (!email || !password)
-      return res.status(400).json({ message: "Email and password required" });
-
-    // 1️⃣ Find user + password
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "+password"
-    );
-    if (!user) {
-      console.log(`Login failed: User not found for email: ${email.toLowerCase()}`);
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // 2️⃣ Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log(`Login failed: Password mismatch for user: ${user.email}`);
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
-
-    // 3️⃣ Generate tokens
-    const accessToken = generateAcessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-    // 4️⃣ Store hashed refresh token in DB
-    const hashedToken = await bcrypt.hash(refreshToken, 10);
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    // model level update
-    await User.updateOne(
-      { _id: user._id },
-      {
-        $push: { refreshTokens: { token: hashedToken, expiresAt } },
-        $set: { loggedIn: true },
-      }
-    );
-
-    // 5️⃣ Set refresh token cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    // 6️⃣ Send response
-    res.status(200).json({
-      message: "Login successful",
-      accessToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ 
-      message: "Internal Server Error", 
-      error: error.message,
-      details: process.env.NODE_ENV === "development" ? error : undefined
-    });
+  if (!email || !password) {
+    throw new ApiError(400, "All fields are required");
   }
-};
+
+  // 1️⃣ Find user + password
+  const user = await User.findOne({ email: email.toLowerCase() }).select(
+    "+password"
+  );
+  if (!user) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  // 2️⃣ Compare password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  // 3️⃣ Generate tokens
+  const accessToken = generateAcessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  // 4️⃣ Store hashed refresh token in DB
+  const hashedToken = await bcrypt.hash(refreshToken, 10);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  // model level update
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $push: { refreshTokens: { token: hashedToken, expiresAt } },
+      $set: { loggedIn: true },
+    }
+  );
+
+  // 5️⃣ Set refresh token cookie
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  // 6️⃣ Send response
+  res.status(200).json({
+    message: "Login successful",
+    accessToken,
+    user: {
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    },
+  });
+});
 
 // -------------------- LOGOUT USER --------------------
 const logoutUser = async (req, res) => {
