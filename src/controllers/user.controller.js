@@ -14,7 +14,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 // GET single user by ID
 const getUserById = asyncHandler(async (req, res) => {
-  const { id } = reqw.params;
+  const { id } = req.params;
 
   // Validate ObjectId format
   if (!id || !mongoose.isValidObjectId(id)) {
