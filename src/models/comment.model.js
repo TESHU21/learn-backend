@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { type } from "node:os";
-import { maxLength, required } from "zod/mini";
+
 const commentSchema = new Schema(
   {
     postId: {

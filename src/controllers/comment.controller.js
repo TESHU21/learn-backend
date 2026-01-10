@@ -88,7 +88,7 @@ const editComment = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "comment updated sucessfully", comment });
 });
 // delete a specific comment
-const deleteSingleCommment = asyncHandler(async (req, res) => {
+const deleteSingleComment = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError(400, "Invalid Comment Id");
@@ -97,14 +97,19 @@ const deleteSingleCommment = asyncHandler(async (req, res) => {
   if (!comment || comment.isDeleted) {
     return res.status(404).json({ message: "Not Found" });
   }
-  if (!comment.userId.equals(req.user.id)) {
-    throw new ApiError(403, "Forbidden");
+  const isOwner = comment.userId.equals(req.user._id);
+  const isAdmin = req.user?.role === "admin";
+  // Block only if NOT admin AND NOT owner
+  if (!isAdmin && !isOwner) {
+    throw new ApiError(403, "You Are Not allowed to delete this comment");
   }
   comment.isDeleted = true;
   await comment.save();
+  await Post.findByIdAndUpdate(comment.postId, { $inc: { commentsCount: -1 } });
+
   res.status(200).json({
     success: true,
     message: "Comment deleted successfully",
   });
 });
-export { addComment, getAllCommentByPost, editComment, deleteSingleCommment };
+export { addComment, getAllCommentByPost, editComment, deleteSingleComment };

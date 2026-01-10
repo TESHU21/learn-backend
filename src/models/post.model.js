@@ -35,8 +35,14 @@ const postSchema = new Schema(
       ref: "User",
       required: true,
     },
+    // Counter for fast read
+    likesCount: { type: Number, default: 0 },
+    commentCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+// Indexes for enterprise scale
+postSchema.index({ createdAt: -1 });
+postSchema.index({ author: 1, createdAt: -1 });
 
 export const Post = mongoose.model("Post", postSchema);
