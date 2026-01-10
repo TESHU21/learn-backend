@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import userRouter from "./routes/user.route.js"; // Make sure the path is correct
 import postRouter from "./routes/post.route.js";
+import commentRouter from "./routes/comment.route.js";
 import { globalErrorHandler } from "./middlewares/error.middleware.js";
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(
 // Mount the user routes to /api/v1/users
 app.use("/api/v1/users", userRouter); // Ensure the base path is correct
 app.use("/api/v1/posts", postRouter); // Ensure the base path is correct
+app.use("/api/v1/comment", commentRouter);
 app.use(globalErrorHandler);
 
 export default app;
