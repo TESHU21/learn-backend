@@ -3,13 +3,12 @@ import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Post } from "../models/post.model.js";
-import { success } from "zod";
 // add or change the reaction
 const reactPost = asyncHandler(async (req, res) => {
   const { type } = req.body;
   const { postId } = req.params;
   const userId = req.user._id;
-  //   validate post Id
+  // validate post Id
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     throw new ApiError(400, "Invalid PostId");
   }
@@ -21,11 +20,11 @@ const reactPost = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Post not found");
   }
 
-  const reaction = await Reaction.findOne({ postId, userId });
+  let reaction = await Reaction.findOne({ postId, userId });
   if (reaction) {
     // update existing reaction
     reaction.type = type;
-    reaction = await Reaction.save();
+    await reaction.save();
   } else {
     // create new raction
     reaction = await Reaction.create({ postId, userId, type });
@@ -39,7 +38,7 @@ const reactPost = asyncHandler(async (req, res) => {
 });
 // remove reaction
 const removeReaction = asyncHandler(async (req, res) => {
-  const postId = req.params.id;
+  const { postId } = req.params;
   const userId = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     throw new ApiError(400, "Invalid Post Id");
@@ -52,7 +51,7 @@ const removeReaction = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "reaction removed sucessfully" });
 });
 const getReactionstats = asyncHandler(async (req, res) => {
-  const postId = req.params.id;
+  const { postId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     throw new ApiError(400, "Invalid Post Id");
   }
@@ -65,7 +64,9 @@ const getReactionstats = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  res.status(200).json({ message: "Reaction Status retrieved sucessfully" });
+  res
+    .status(200)
+    .json({ message: "Reaction Status retrieved sucessfully", data: stats });
 });
 
 export { reactPost, removeReaction, getReactionstats };

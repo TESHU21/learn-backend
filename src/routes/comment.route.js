@@ -24,9 +24,9 @@ router
   .get(authenticate, authorizeRoles("user", "admin"), getAllCommentByPost);
 // Edit a post
 router
-  .route("/:id")
+  .route("/:postId")
   .patch(authenticate, authorizeRoles("user", "admin"), editComment);
 router
-  .route("/:id")
+  .route("/:postId")
   .delete(authenticate, authorizeRoles("user", "admin"), deleteSingleComment);
 export default router;

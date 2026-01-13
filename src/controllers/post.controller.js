@@ -23,11 +23,42 @@ const createPost = asyncHandler(async (req, res) => {
 });
 // Get All Posts
 const getPosts = asyncHandler(async (req, res) => {
-  const posts = await Post.find();
+  // pagination
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 2;
+  const skip = (page - 1) * limit;
+
+  // filtering
+  let filter = {};
+  if (req.query.author) {
+    filter.author = req.query.author;
+  }
+  if (req.query.status) {
+    filter.status = req.query.status;
+  }
+  // sorting
+  let sort = "-createdAt";
+  if (req.query.sort) {
+    sort = req.query.sort;
+  }
+  const posts = await Post.find()
+    .populate("author", "name age")
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
+  const totalPosts = await Post.countDocuments(filter);
+
   if (!posts) {
     throw new ApiError(400, "No Posts Found");
   }
-  res.status(200).json(posts);
+
+  res.status(200).json({
+    success: true,
+    totalPosts,
+    currentPage: page,
+    totalPages: Math.ceil(totalPosts / limit),
+    posts,
+  });
 });
 
 // get a single posst
