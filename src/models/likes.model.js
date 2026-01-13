@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { required } from "zod/mini";
 const reactionSchema = new Schema(
   {
     postId: {
