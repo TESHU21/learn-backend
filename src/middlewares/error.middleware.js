@@ -2,13 +2,8 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const globalErrorHandler = (err, req, res, next) => {
   let error = err;
-
+  console.log(err);
   // 🔥 Log full error (server-side only)
-  console.error("🔥 ERROR", {
-    message: err.message,
-    source: err.source,
-    stack: err.stack,
-  });
 
   // Convert unknown errors to ApiError
   if (!(error instanceof ApiError)) {
