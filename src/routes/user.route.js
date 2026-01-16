@@ -6,8 +6,10 @@ import {
   loginUser,
   logoutUser,
 } from "../controllers/auth.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 import { getAllUsers, getUserById } from "../controllers/user.controller.js";
-import cloudinaryUp
+import { uploadAvatar } from "../controllers/avatar.controller.js";
+import avatarUploader from "../middlewares/avatarUpload.middleware.js";
 const router = Router();
 
 // auth routes (specific routes first)
@@ -21,5 +23,10 @@ router.post("/logout", logoutUser);
 router.route("/").get(getAllUsers);
 // GET /api/v1/users/:id -> single user
 router.route("/:id").get(getUserById);
+// upload avatar
+
+router
+  .route("/avatar")
+  .put(authenticate, avatarUploader.single("avatar"), uploadAvatar);
 
 export default router;
