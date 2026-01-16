@@ -1,7 +1,7 @@
-import { User } from "../models/user.model";
-import cloudinary from "../config/cloudinary";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ApiError } from "../utils/ApiError";
+import { User } from "../models/user.model.js";
+import cloudinary from "../config/cloudinary.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 export const uploadAvatar = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw new ApiError(400, "Avatar Image is required");
