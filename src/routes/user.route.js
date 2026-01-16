@@ -7,6 +7,7 @@ import {
   logoutUser,
 } from "../controllers/auth.controller.js";
 import { getAllUsers, getUserById } from "../controllers/user.controller.js";
+import cloudinaryUp
 const router = Router();
 
 // auth routes (specific routes first)
