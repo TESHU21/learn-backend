@@ -10,6 +10,7 @@ import { authenticate } from "../middlewares/auth.middleware.js";
 import { getAllUsers, getUserById } from "../controllers/user.controller.js";
 import { uploadAvatar } from "../controllers/avatar.controller.js";
 import avatarUploader from "../middlewares/avatarUpload.middleware.js";
+import { changePassword } from "../controllers/changePassword.controller.js";
 const router = Router();
 
 // auth routes (specific routes first)
@@ -28,5 +29,7 @@ router.route("/:id").get(getUserById);
 router
   .route("/avatar")
   .put(authenticate, avatarUploader.single("avatar"), uploadAvatar);
+// change password
+router.route("/change-password").put(authenticate, changePassword);
 
 export default router;
