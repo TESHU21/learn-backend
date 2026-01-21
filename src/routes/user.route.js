@@ -11,6 +11,9 @@ import { getAllUsers, getUserById } from "../controllers/user.controller.js";
 import { uploadAvatar } from "../controllers/avatar.controller.js";
 import avatarUploader from "../middlewares/avatarUpload.middleware.js";
 import { changePassword } from "../controllers/changePassword.controller.js";
+import { updateProfile } from "../controllers/user.controller.js";
+import { updateProfileSchema } from "../schemas/profile.schema.js";
+import { validateRequest } from "../middlewares/validate.js";
 const router = Router();
 
 // auth routes (specific routes first)
@@ -31,5 +34,8 @@ router
   .put(authenticate, avatarUploader.single("avatar"), uploadAvatar);
 // change password
 router.route("/change-password").put(authenticate, changePassword);
+router
+  .route("update-profile")
+  .put(authenticate, validateRequest(updateProfileSchema), updateProfile);
 
 export default router;

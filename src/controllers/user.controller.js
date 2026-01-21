@@ -35,4 +35,28 @@ const getUserById = asyncHandler(async (req, res) => {
   });
 });
 
-export { getAllUsers, getUserById };
+const updateProfile = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const allowedFields = ["firstName", "lastName", "phone", "bio", "address"];
+  const updates = {};
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  });
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).select("-password");
+  if (!user) {
+    throw new ApiError(400, "user is not found");
+  }
+  res.status(200).json({
+    message: "profile updated successfully",
+    data: user,
+  });
+});
+i;
+export { getAllUsers, getUserById, updateProfile };

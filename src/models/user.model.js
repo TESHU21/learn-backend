@@ -1,10 +1,25 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import { type } from "node:os";
-import { required } from "zod/mini";
+import { maxLength, minLength, minSize, required } from "zod/mini";
+import { string } from "zod";
 
 const userSchema = new Schema(
   {
+    firstName: {
+      type: String,
+      minLength: 1,
+      maxLength: 30,
+      trim: true,
+      default: "",
+    },
+    lastName: {
+      type: String,
+      minLength: 1,
+      maxLength: 30,
+      trim: true,
+      default: "",
+    },
     username: {
       type: String,
       required: true,
@@ -32,6 +47,18 @@ const userSchema = new Schema(
       type: String,
       enum: ["user", "admin", "moderator"],
       default: "user",
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
+    phone: {
+      type: String,
+      default: "",
+    },
+    address: {
+      type: String,
+      default: "",
     },
     refreshTokens: [
       {
