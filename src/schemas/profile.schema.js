@@ -20,6 +20,6 @@ const updateProfileSchema = z.object({
     .optional(),
 
   address: z.string().max(300).optional(),
-  bio: Joi.string().max(300).optional(),
+  bio: z.string().max(300).optional(),
 });
 export { updateProfileSchema };

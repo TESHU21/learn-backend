@@ -58,5 +58,5 @@ const updateProfile = asyncHandler(async (req, res) => {
     data: user,
   });
 });
-i;
+
 export { getAllUsers, getUserById, updateProfile };

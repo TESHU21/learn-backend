@@ -35,7 +35,7 @@ router
 // change password
 router.route("/change-password").put(authenticate, changePassword);
 router
-  .route("update-profile")
+  .route("/update-profile")
   .put(authenticate, validateRequest(updateProfileSchema), updateProfile);
 
 export default router;
