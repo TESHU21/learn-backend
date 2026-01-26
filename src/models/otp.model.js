@@ -12,6 +12,11 @@ const resetOtpSchema = new mongoose.Schema(
     otpHash: { type: String, required: true },
     expiresAt: { type: Date, required: true },
     attempts: { type: Number, default: 0 },
+    purpose: {
+      type: String,
+      enum: ["PASSWORD_RESET", "EMAIL_VERIFY"],
+      required: true,
+    },
     used: { type: Boolean, default: false },
   },
   {
@@ -24,3 +29,4 @@ resetOtpSchema.methods.verifyOTP = function (otp) {
 };
 // TTL Index-auto delete expired OTP
 resetOtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+export default mongoose.model("Otp", resetOtpSchema);

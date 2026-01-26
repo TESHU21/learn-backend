@@ -7,21 +7,26 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import Otp from "../models/otp.model.js";
 // request password reset
-const requestPasswordReset = asyncHandler(async (requestPasswordReset, res) => {
+const requestPasswordReset = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
+  console.log("Email", email);
+
   if (!user) {
     return res
       .status(200)
       .json({ message: "If the email exists, OTP has been sent" });
   }
   const otp = generateOtp();
+  console.log("Generating OTP", otp);
   await Otp.create({
     userId: user._id,
+    email: email,
     purpose: "PASSWORD_RESET",
-    otpHash: hashValue(otp),
+    otpHash: hashOtp(otp),
     expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   });
+
   await sendOtpEmail(email, otp);
   res.status(200).json({
     message: "If the email exists,OTP has been sent",
@@ -52,14 +57,14 @@ const verifyPasswordResetOtp = asyncHandler(async (req, res) => {
   }
   // OTP valid-delete it
   await record.deleteOne();
-  res.json({
+  res.status(200).json({
     message: "OTP verified",
   });
 });
 // Password Reset
 const resetPassword = asyncHandler(async (req, res) => {
   const { email, newPassword } = req.body;
-  const user = User.findOne({ email });
+  const user = await User.findOne({ email });
   if (!user) {
     throw new ApiError(404, "unautorized");
   }

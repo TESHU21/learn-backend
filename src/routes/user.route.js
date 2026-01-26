@@ -14,6 +14,19 @@ import { changePassword } from "../controllers/changePassword.controller.js";
 import { updateProfile } from "../controllers/user.controller.js";
 import { updateProfileSchema } from "../schemas/profile.schema.js";
 import { validateRequest } from "../middlewares/validate.js";
+import {
+  requestPasswordReset,
+  verifyPasswordResetOtp,
+  resetPassword,
+} from "../controllers/forgotpassword.controller.js";
+import {
+  resetRequestLimiter,
+  otpLimiter,
+} from "../middlewares/rateLimit.middleware.js";
+import {
+  passwordResetRequest,
+  resetPasswordSchema,
+} from "../schemas/passwordRest.schema.js";
 const router = Router();
 
 // auth routes (specific routes first)
@@ -37,5 +50,22 @@ router.route("/change-password").put(authenticate, changePassword);
 router
   .route("/update-profile")
   .put(authenticate, validateRequest(updateProfileSchema), updateProfile);
+// password reset flow
+router.route("/password-reset/request").post(
+  authenticate,
+  // validateRequest(passwordResetRequest),
+  requestPasswordReset
+);
+router
+  .route("/password-reset/verify")
+  .post(authenticate, otpLimiter, verifyPasswordResetOtp);
+router
+  .route("/password-reset/confirm")
+  .post(
+    authenticate,
+    validateRequest(resetPasswordSchema),
+    otpLimiter,
+    resetPassword
+  );
 
 export default router;
