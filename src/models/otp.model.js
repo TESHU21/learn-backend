@@ -18,6 +18,14 @@ const resetOtpSchema = new mongoose.Schema(
       required: true,
     },
     used: { type: Boolean, default: false },
+    // verification proof
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    // reset token
+    resetTokenHash: String,
+    resetTokenExpires: Date,
   },
   {
     timestamps: true,
