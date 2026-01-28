@@ -1,7 +1,6 @@
 import bycrypt from "bcrypt";
 import { User } from "../models/user.model.js";
-import { generateOtp } from "../utils/otp.js";
-import { hashOtp } from "../utils/otp.js";
+import { hashOtp, generateOtp, generateResetToken } from "../utils/otp.js";
 import { sendOtpEmail } from "../config/mailersend.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -55,21 +54,41 @@ const verifyPasswordResetOtp = asyncHandler(async (req, res) => {
     await record.save();
     throw new ApiError("Invalid OTP");
   }
+  // OTP-verified  token generation
+  const resetToken = generateResetToken();
   // OTP valid-delete it
-  await record.deleteOne();
+  record.resetTokenHash = resetToken;
+  record.resetTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+  record.otpHash = undefined;
+  await record.save();
   res.status(200).json({
     message: "OTP verified",
+    resetToken,
   });
 });
 // Password Reset
 const resetPassword = asyncHandler(async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { email, newPassword, resetToken } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
     throw new ApiError(404, "unautorized");
   }
+  const record = await Otp.findOne({
+    userId: user._id,
+    purpose: "PASSWORD_RESET",
+    resetTokenHash: hashOtp(resetToken),
+  });
+  if (
+    !record ||
+    !record.resetTokenExpires ||
+    record.resetTokenExpires < Date.now()
+  ) {
+    throw new ApiError(404, "Invalid or expired reset token");
+  }
   user.password = await bycrypt.hash(newPassword, 10);
   await user.save();
+  // Clean Up or delete
+  await record.deleteOne();
   res.status(200).json({ message: "Password Reset Successfull" });
 });
 export { requestPasswordReset, verifyPasswordResetOtp, resetPassword };

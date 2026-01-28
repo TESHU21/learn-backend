@@ -5,4 +5,7 @@ const generateOtp = () => {
 const hashOtp = (otp) => {
   return crypto.createHash("sha256").update("otp").digest("hex");
 };
-export { generateOtp, hashOtp };
+const generateResetToken = () => {
+  return crypto.randomBytes(32).toString("hex");
+};
+export { generateOtp, hashOtp, generateResetToken };
