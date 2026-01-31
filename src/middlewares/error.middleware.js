@@ -1,9 +1,20 @@
 import { ApiError } from "../utils/ApiError.js";
+import logger from "../utils/logger.js";
 
 export const globalErrorHandler = (err, req, res, next) => {
   let error = err;
-  console.log(err);
+
   // 🔥 Log full error (server-side only)
+  logger.error(
+    {
+      message: err.message,
+      stack: err.stack,
+      path: req.originalUrl,
+      method: req.method,
+      ip: req.ip,
+    },
+    "Unhandled error"
+  );
 
   // Convert unknown errors to ApiError
   if (!(error instanceof ApiError)) {

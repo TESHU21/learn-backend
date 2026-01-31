@@ -1,4 +1,4 @@
-import { randomUUID, UUID } from "crypto";
+import { randomUUID } from "crypto";
 const requestId = (req, res, next) => {
   req.requestId = randomUUID();
   res.setHeader("X-Request-Id", req.requestId);

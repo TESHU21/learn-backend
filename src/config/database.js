@@ -2,19 +2,19 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    if (!process.env.MONGODB_URI) {
+    const uri =
+      process.env.NODE_ENV === "test"
+        ? process.env.MONGODB_URI_TEST
+        : process.env.MONGODB_URI;
+    if (!uri) {
       console.log("⚠️  MONGODB_URI is not defined in .env file");
       return false;
     }
-    console.log("Mongo_DB_URI", process.env.MONGODB_URI);
 
-    const connectionInstance = await mongoose.connect(
-      `${process.env.MONGODB_URI}`,
-      {
-        serverSelectionTimeoutMS: 30000, // Timeout after 5s instead of 30s
-        socketTimeoutMS: 30000,
-      }
-    );
+    const connectionInstance = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 30000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 30000,
+    });
 
     console.log(
       `✅ MongoDB Connected! Host: ${connectionInstance.connection.host}`
