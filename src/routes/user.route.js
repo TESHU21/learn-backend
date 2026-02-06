@@ -37,9 +37,9 @@ router.post("/logout", logoutUser);
 
 // user routes (parameterized routes last)
 // GET /api/v1/users  -> all users
-router.route("/").get(getAllUsers);
+router.route("/").get(authenticate, getAllUsers);
 // GET /api/v1/users/:id -> single user
-router.route("/:id").get(getUserById);
+router.route("/:id").get(authenticate, getUserById);
 // upload avatar
 
 router

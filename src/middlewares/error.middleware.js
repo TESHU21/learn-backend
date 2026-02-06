@@ -26,7 +26,7 @@ export const globalErrorHandler = (err, req, res, next) => {
 
   const response = {
     success: false,
-    message: error.statusCode >= 500 ? "Internal Server Error" : error.message,
+    message: error.isOperational ? error.message : "Internal Server Error",
   };
 
   // DEV-only debug info
