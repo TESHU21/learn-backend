@@ -12,7 +12,9 @@ const app = express();
 app.use(express.json()); // Middleware to parse JSON bodies
 
 const allowedorigins = ["http://localhost:3000", "http://localhost:4000"];
-app.use(httpLogger); // log all requests
+if (process.env.NODE_ENV !== "test") {
+  app.use(httpLogger); // log all requests
+}
 app.use(helmet()); // protect jwt  headers
 app.use(
   cors({

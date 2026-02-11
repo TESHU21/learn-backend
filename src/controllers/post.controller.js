@@ -18,7 +18,7 @@ const createPost = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     message: "Post created successfully",
-    post,
+    data: post,
   });
 });
 // Get All Posts
@@ -57,7 +57,7 @@ const getPosts = asyncHandler(async (req, res) => {
     totalPosts,
     currentPage: page,
     totalPages: Math.ceil(totalPosts / limit),
-    posts,
+    data: posts,
   });
 });
 
