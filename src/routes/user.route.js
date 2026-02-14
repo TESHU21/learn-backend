@@ -31,6 +31,7 @@ const router = Router();
 
 // auth routes (specific routes first)
 router.post("/register", registerUser);
+
 router.post("/login", loginUser);
 router.post("/refresh", refreshAccessToken);
 router.post("/logout", logoutUser);

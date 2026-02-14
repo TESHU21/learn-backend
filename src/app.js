@@ -7,6 +7,9 @@ import commentRouter from "./routes/comment.route.js";
 import likesRouter from "./routes/likes.route.js";
 import { globalErrorHandler } from "./middlewares/error.middleware.js";
 import httpLogger from "./middlewares/httpLogger.middleware.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.js";
+
 const app = express();
 
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -23,6 +26,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Mount the user routes to /api/v1/users
 app.use("/api/v1/users", userRouter); // Ensure the base path is correct
