@@ -5,7 +5,8 @@ import { Post } from "../models/post.model.js";
 import mongoose from "mongoose";
 
 const addComment = asyncHandler(async (req, res) => {
-  const { postId, text } = req.body;
+  const { postId } = req.params;
+  const { text } = req.body;
 
   // Validate input
   if (!postId || !text?.trim()) {
@@ -22,7 +23,7 @@ const addComment = asyncHandler(async (req, res) => {
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
-
+  console.log("request user", req.user);
   // Create comment
   const comment = await Comment.create({
     postId,
@@ -81,16 +82,16 @@ const getAllCommentByPost = asyncHandler(async (req, res) => {
 
 // Edit a comment
 const editComment = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
+  const { commentId } = req.params;
   const { text } = req.body;
   // validate a comment Id
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
     throw new ApiError(400, "Invalid Comment Id");
   }
   if (!text || !text.trim()) {
     throw new ApiError(400, "comment text is required");
   }
-  const comment = await Comment.findById(id);
+  const comment = await Comment.findById(commentId);
   if (!comment || comment.isDeleted) {
     return res.status(404).json({ message: "Not Found" });
   }
@@ -103,11 +104,11 @@ const editComment = asyncHandler(async (req, res, next) => {
 });
 // delete a specific comment
 const deleteSingleComment = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  const { commentId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
     throw new ApiError(400, "Invalid Comment Id");
   }
-  const comment = await Comment.findById(id);
+  const comment = await Comment.findById(commentId);
   if (!comment || comment.isDeleted) {
     return res.status(404).json({ message: "Not Found" });
   }
@@ -126,4 +127,32 @@ const deleteSingleComment = asyncHandler(async (req, res) => {
     message: "Comment deleted successfully",
   });
 });
-export { addComment, getAllCommentByPost, editComment, deleteSingleComment };
+// Get a Single Comment By Id
+const getSingleComment = asyncHandler(async (req, res) => {
+  const { commentId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
+    throw new ApiError(400, "Invalid Comment Id");
+  }
+  // Find Comment
+
+  const comment = await Comment.findById(commentId).populate(
+    "userId",
+    "_id email role"
+  );
+  if (!comment) {
+    return res.status(404).json({ message: "Not Found" });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: comment,
+    message: "Comment deleted successfully",
+  });
+});
+export {
+  addComment,
+  getAllCommentByPost,
+  editComment,
+  getSingleComment,
+  deleteSingleComment,
+};
