@@ -1,74 +1,64 @@
 /**
  * @swagger
- * /api/v1/comment:
+ * /api/v1/comment/{postId}:
  *   post:
- *     summary: Create a new post
- *     description: This endpoint allows you to create a new post with a name, description, and age.
+ *     summary: Add a comment to a post
+ *     description: This endpoint allows a user to add a comment to a specific post.
  *     tags:
  *       - Comments
+ *
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post
+ *
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - description
- *               - age
- *             properties:
- *               name:
- *                 type: string
- *                 description: The name of the post
- *                 example: My First Post
- *               description:
- *                 type: string
- *                 description: A detailed description of the post
- *                 example: This is a post about Swagger documentation.
- *               age:
- *                 type: integer
- *                 description: Age related to the post
- *                 example: 5
+ *             $ref: "#/components/schemas/Comment"
+ *
  *     responses:
  *       201:
- *         description: Post created successfully
+ *         description: Comment created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 123456
- *                 name:
- *                   type: string
- *                   example: My First Post
- *                 description:
- *                   type: string
- *                   example: This is a post about Swagger documentation.
- *                 age:
- *                   type: integer
- *                   example: 5
+ *               $ref: "#/components/schemas/Comment"
+ *
  *       400:
  *         description: Bad request. Missing or invalid parameters
+ *
+ *       404:
+ *         description: Post not found
  */
 
-/**
- * @swagger
- * /api/v1/posts:
+/** @swagger
+ * /api/v1/comment/post/{postId}:
  *   get:
- *     summary: Get all posts
+ *     summary: Get all comments of a posts
  *     tags:
- *       - Posts
+ *       - Comments
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post
  *     security:
  *       - bearerAuth: []  # Authorization required
  *     responses:
  *       200:
- *         description: Post fetched successfully
+ *         description: Comment fetched successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               $ref: '#/components/schemas/Comment'
  *       401:
  *         description: Unauthorized
  *       404:
@@ -76,16 +66,16 @@
  */
 /**
  * @swagger
- * /api/v1/posts/{id}:
- *   delete:
- *     summary: Get a single post by ID
+ * /api/v1/comment/{commentId}/:
+ *   get:
+ *     summary: Get a single Comment By ID
  *     tags:
- *       - Posts
+ *       - Comments
  *     security:
  *       - bearerAuth: []   # 🔑 Authorization required
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: commentId
  *         schema:
  *           type: string
  *         required: true
@@ -96,74 +86,78 @@
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Post'
+ *               $ref: '#/components/schemas/Comment'
  *       401:
  *         description: Unauthorized
  *       404:
- *         description: Post not found
+ *         description: Comment not found
  */
 
 /**
  * @swagger
- * /api/v1/posts/update/{id}:
+ * /api/v1/posts/comment/{commentId}:
  *   patch:
- *     summary: Update an existing post
- *     description: This endpoint updates a post using its ID.
+ *     summary: Update an existing comment
+ *     description: This endpoint updates a comment using its ID.
  *     tags:
- *       - Posts
+ *       - Comments
+ *
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: commentId
  *         required: true
- *         description: The ID of the post to update
+ *         description: The ID of the comment to update
  *         schema:
  *           type: string
- *           example: 123456
+ *           example: 64fbc12a9c12ab1234567890
  *
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Updated name of the post
- *                 example: Updated Post Name
- *               description:
- *                 type: string
- *                 description: Updated description of the post
- *                 example: This post has been updated successfully.
- *               age:
- *                 type: integer
- *                 description: Updated age value
- *                 example: 10
+ *             $ref: "#/components/schemas/Comment"
  *
  *     responses:
  *       200:
- *         description: Post updated successfully
+ *         description: Comment updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 123456
- *                 name:
- *                   type: string
- *                   example: Updated Post Name
- *                 description:
- *                   type: string
- *                   example: This post has been updated successfully.
- *                 age:
- *                   type: integer
- *                   example: 10
+ *               $ref: "#/components/schemas/Comment"
  *
  *       404:
- *         description: Post not found
+ *         description: Comment not found
  *
  *       400:
  *         description: Invalid request data
+ */
+
+/**
+ * @swagger
+ * /api/v1/comment/{commentId}:
+ *   delete:
+ *     summary: delete an existing comment
+ *     description: This endpoint updates a post using its ID.
+ *     tags:
+ *       - Comments
+ *     parameters:
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         description: The ID of the post to delete
+ *         schema:
+ *           type: string
+ *           example: 123456
+ *
+ *
+ *
+ *     responses:
+ *       200:
+ *         description: Comment Deleeted successfully
+ *       404:
+ *         description: Comment not found
+ *
+ *       400:
+ *         description: Invalid request Comment Id
  */

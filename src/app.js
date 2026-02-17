@@ -9,6 +9,7 @@ import { globalErrorHandler } from "./middlewares/error.middleware.js";
 import httpLogger from "./middlewares/httpLogger.middleware.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -19,6 +20,7 @@ if (process.env.NODE_ENV !== "test") {
   app.use(httpLogger); // log all requests
 }
 app.use(helmet()); // protect jwt  headers
+app.use(cookieParser()); // it should be before route
 app.use(
   cors({
     origin: allowedorigins,

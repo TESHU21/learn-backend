@@ -3,7 +3,6 @@
  * /api/v1/posts/create:
  *   post:
  *     summary: Create a new post
- *     description: This endpoint allows you to create a new post with a name, description, and age.
  *     tags:
  *       - Posts
  *     requestBody:
@@ -11,46 +10,14 @@
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - description
- *               - age
- *             properties:
- *               name:
- *                 type: string
- *                 description: The name of the post
- *                 example: My First Post
- *               description:
- *                 type: string
- *                 description: A detailed description of the post
- *                 example: This is a post about Swagger documentation.
- *               age:
- *                 type: integer
- *                 description: Age related to the post
- *                 example: 5
+ *             $ref: "#/components/schemas/Post"
  *     responses:
  *       201:
  *         description: Post created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                   example: 123456
- *                 name:
- *                   type: string
- *                   example: My First Post
- *                 description:
- *                   type: string
- *                   example: This is a post about Swagger documentation.
- *                 age:
- *                   type: integer
- *                   example: 5
- *       400:
- *         description: Bad request. Missing or invalid parameters
+ *               $ref: "#/components/schemas/Post"
  */
 
 /**
