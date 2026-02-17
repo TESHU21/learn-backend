@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 // controllers/auth.controller.js
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import validator from "validator";
 import { generateAcessToken, generateRefreshToken } from "../utils/token.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -38,7 +39,7 @@ const registerUser = async (req, res) => {
     const { username, email, password, role } = req.body;
 
     // 1️⃣ Basic validation
-    if (!username || !email || !password || !role) {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -136,52 +137,41 @@ const loginUser = asyncHandler(async (req, res) => {
     },
   });
 });
-
-// -------------------- LOGOUT USER --------------------
+// ========================Logout User============
 const logoutUser = async (req, res) => {
   try {
-    console.log("Refresh Token", req);
-    const refreshToken = req.cookie.refreshToken;
+    console.log("refreshToken", req.cookies);
+    const refreshToken = req.cookies?.refreshToken;
+
+    // No token → already logged out
     if (!refreshToken) {
-      return res.status(400).json({ message: "No refresh token provided" });
+      return res.sendStatus(204);
     }
 
-    // 1️⃣ Find user who owns this refresh token
-    const allUsers = await User.find({});
-    let user;
-    for (const u of allUsers) {
-      for (const t of u.refreshTokens) {
-        if (await bcrypt.compare(refreshToken, t.token)) {
-          user = u;
-          break;
-        }
-      }
-      if (user) break;
-    }
+    // Hash refresh token (recommended)
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
 
-    // 2️⃣ If no user found, clear cookie and exit
-    if (!user) {
-      res.clearCookie("refreshToken");
-      return res.status(204).send();
-    }
-
-    // 3️⃣ Remove refresh token
-    user.refreshTokens = user.refreshTokens.filter(
-      (t) => !bcrypt.compare(refreshToken, t.token)
+    // Remove token from DB
+    await User.findOneAndUpdate(
+      { "refreshTokens.token": hashedToken },
+      { $pull: { refreshTokens: { token: hashedToken } } }
     );
-    await user.save();
 
-    // 4️⃣ Clear cookie
+    // Clear cookie
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
+      path: "/api/v1/auth/refresh", // must match cookie path
     });
 
-    res.status(200).json({ message: "Logout successful" });
-  } catch (error) {
-    console.error("Logout Error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    return res.status(200).json({ message: "Logout successful" });
+  } catch (err) {
+    console.error("Logout error:", err);
+    return res.sendStatus(500);
   }
 };
 
